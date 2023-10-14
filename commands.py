@@ -1,16 +1,21 @@
 import telebot
 import operator
-from telebot import types
 from database_operations import *
 from datetime import datetime, timedelta
 from constants import BOT_TOKEN
-import locale
-
-# Configurar la localización en español
-locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# Definir un diccionario de mapeo de días de la semana en inglés a español
+dias_semana_ingles = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+dias_semana_espanol = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+mapeo_dias_semana = dict(zip(dias_semana_ingles, dias_semana_espanol))
+
+# Función para obtener el nombre del día de la semana en español
+def obtener_dia_semana_en_espanol(fecha):
+    dia_semana_ingles = fecha.strftime("%A")
+    dia_semana_espanol = mapeo_dias_semana.get(dia_semana_ingles, dia_semana_ingles)
+    return dia_semana_espanol
 
 @bot.message_handler(commands=["ayuda"])
 def help(message):
@@ -268,15 +273,7 @@ def birthdays_in_month(message):
                     response = "Cumpleaños en el mes:\n"
                     for birthday in upcoming_birthdays:
                         today = datetime.now()
-
-                        birthday_date = datetime(
-                            today.year,
-                            birthday["birthdayMonth"],
-                            birthday["birthdayDay"],
-                        )
-                        day_of_week = birthday_date.strftime(
-                            "%A"
-                        )  # Obtener el nombre del día de la semana
+                        day_of_week = obtener_dia_semana_en_espanol(today)
 
                         response += f"{birthday['name']} {birthday['surname']} - {birthday['birthdayDay']}/{birthday['birthdayMonth']} - {day_of_week}\n"
                 else:
@@ -324,13 +321,7 @@ def birthdays_in_week(message):
             response = "Cumpleaños en la semana:\n"
             for birthday in upcoming_birthdays:
                 today = datetime.now()
-
-                birthday_date = datetime(
-                    today.year, birthday["birthdayMonth"], birthday["birthdayDay"]
-                )
-                day_of_week = birthday_date.strftime(
-                    "%A"
-                )  # Obtener el nombre del día de la semana
+                day_of_week = obtener_dia_semana_en_espanol(today)
 
                 response += f"{birthday['name']} {birthday['surname']} - {birthday['birthdayDay']}/{birthday['birthdayMonth']} - {day_of_week}\n"
         else:
